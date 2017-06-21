@@ -1,0 +1,64 @@
+variables:
+  PACKAGE_NAME: fedmsg-cvs
+
+stages:
+  - build
+  - test
+  - package
+  - publish
+
+.rpmbuild: &rpmbuild
+  stage: package
+  image: ed/pld-builder
+  script: |
+    pkg-build
+
+package:tsl:
+  <<: *rpmbuild
+  artifacts:
+    name: $PACKAGE_NAME
+    paths:
+      - ./*.rpm
+    expire_in: 1 month
+  except:
+    - tags
+
+package:dsl:
+  <<: *rpmbuild
+  artifacts:
+    name: $PACKAGE_NAME
+    paths:
+      - ./*.rpm
+  only:
+    - tags
+
+.publish: &publish
+  stage: publish
+  script: |
+    pkg-dist ./*.rpm
+
+publish:tsl:
+  <<: *publish
+  tags:
+    - tsl
+  except:
+    - tags
+
+publish:dsl:
+  <<: *publish
+  tags:
+    - dsl
+  only:
+    - tags
+
+unpublish:dsl:
+  stage: publish
+  tags:
+    - dsl
+  only:
+    - tags
+  when: manual
+  script: |
+    pkg-dist -u ./*.rpm
+
+# vim:ts=2:sw=2:et
