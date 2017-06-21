@@ -76,12 +76,12 @@ msg = {
     'user': user,
     'module': module,
     'message' : commit_msg,
-    'files' : [],
+    'files': [],
 }
 
 defopts = { 'url': c['CVSWEB_URL'], 'module': module }
 for filename, oldrev, newrev in grouped(files, 3):
-    opts = defopts
+    opts = defopts.copy()
     opts['file'] = filename
 
     opts['rev'] = newrev
