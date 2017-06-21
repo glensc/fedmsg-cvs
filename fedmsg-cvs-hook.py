@@ -8,7 +8,9 @@
 # ALL $CVSROOT/CVSROOT/fedmsg-cvs-hook /path/to/config.conf $USER %p %{sVv}
 
 import sys
-import subprocess
+import re
+import os
+from subprocess import check_output
 from itertools import izip
 import fedmsg
 
@@ -18,6 +20,7 @@ class FedmsgCvsHook():
         self.files = argv[4:]
         self.commit_msg = self.get_commit_message(stdin)
         self.config = self.parse_config(argv[1])
+        self.commitid_pattern = re.compile('Commit Identifier:\s+(?P<commitid>\S+)')
 
     def buildMessage(self):
         msg = {
@@ -26,7 +29,23 @@ class FedmsgCvsHook():
             'message' : self.commit_msg,
             'files': self.buildFilesMessage(),
         }
+        # grab commit id from all files
+        msg['commitid'] = self.getCommitId(msg['files'])
+
         return msg
+
+    def getCommitId(self, files):
+        commitids = [file['commitid'] for file in files]
+        # make unique
+        commitids = list(set(commitids))
+
+        # return as string with single item
+        if len(commitids) == 1:
+            return commitids[0]
+
+        # this should not happen!
+        # but either way, return None or list
+        return commitids
 
     def buildFilesMessage(self):
         c = self.config
@@ -45,6 +64,7 @@ class FedmsgCvsHook():
         file['filename'] = filename
         file['old_rev'] = oldrev if oldrev != 'NONE' else None
         file['new_rev'] = newrev if newrev != 'NONE' else None
+        file['commitid'] = self.get_commit_id(filename)
         file['urls'] = self.buildUrlsMessage(defopts, file)
         return file
 
@@ -69,6 +89,19 @@ class FedmsgCvsHook():
         if rev:
             opts['rev'] = rev
         return self.config[url] % opts
+
+    def get_commit_id(self, filename):
+        if not os.path.exists(filename):
+            return None
+
+        command = 'cvs -Qn status '.split()
+        command.append(filename)
+
+        out = check_output(command)
+        m = self.commitid_pattern.findall(out)
+        if len(m):
+            return m[0]
+        return None
 
     def get_commit_message(self, stdin):
         """
