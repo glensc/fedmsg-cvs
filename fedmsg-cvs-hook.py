@@ -52,12 +52,17 @@ class FedmsgCvsHook():
         opts = defopts.copy()
         opts.update(file)
         urls = {}
-        urls['log_url'] = self.buildUrl('LOG_URL', opts, opts['new_rev'])
+
         if opts['old_rev']:
             urls['old_url'] = self.buildUrl('CO_URL', opts, opts['old_rev'])
-        urls['new_url'] = self.buildUrl('CO_URL', opts, opts['new_rev'])
-        if opts['old_rev']:
+        if opts['new_rev']:
+            urls['new_url'] = self.buildUrl('CO_URL', opts, opts['new_rev'])
+
+        if opts['old_rev'] and opts['new_rev']:
             urls['diff_url'] = self.buildUrl('DIFF_URL', opts)
+        if opts['new_rev']:
+            urls['log_url'] = self.buildUrl('LOG_URL', opts, opts['new_rev'])
+
         return urls
 
     def buildUrl(self, url, opts, rev = None):
