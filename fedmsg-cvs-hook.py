@@ -52,14 +52,16 @@ class FedmsgCvsHook():
         opts = defopts.copy()
         opts.update(file)
         urls = {}
-        urls['log_url'] = self.buildUrl('LOG_URL', opts, { 'rev' : opts['new_rev'] })
-        urls['old_url'] = self.buildUrl('CO_URL', opts, { 'rev' : opts['old_rev'] })
-        urls['new_url'] = self.buildUrl('LOG_URL', opts, { 'rev' : opts['new_rev'] })
+        urls['log_url'] = self.buildUrl('LOG_URL', opts, opts['new_rev'])
+        urls['old_url'] = self.buildUrl('CO_URL', opts, opts['old_rev'])
+        urls['new_url'] = self.buildUrl('LOG_URL', opts, opts['new_rev'])
         urls['diff_url'] = self.buildUrl('DIFF_URL', opts)
         return urls
 
-    def buildUrl(self, url, opts, extra = {}):
-        return self.config[url] % dict(list(opts.items()) + list(extra.items()))
+    def buildUrl(self, url, opts, rev = None):
+        if rev:
+            opts['rev'] = rev
+        return self.config[url] % opts
 
     def get_commit_message(self, stdin):
         """
