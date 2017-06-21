@@ -33,6 +33,8 @@ class FedmsgCvsHook():
         defopts = { 'url': c['CVSWEB_URL'], 'module': self.module }
         files = []
         for filename, oldrev, newrev in self.grouped(self.files, 3):
+            if filename in ['- New directory']:
+                continue
             file = self.buildFileMessage(defopts, filename, oldrev, newrev)
             files.append(file)
 
