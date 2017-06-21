@@ -14,7 +14,7 @@ fedmsg-cvs-hook.conf
 Add to `CVSROOT/loginfo`:
 
 ```
-ALL /usr/bin/fedmsg-cvs-hook $CVSROOT/CVSROOT/fedmsg-cvs-hook.conf $USER %p %{sVv}
+ALL /usr/sbin/fedmsg-cvs-hook $CVSROOT/CVSROOT/fedmsg-cvs-hook.conf $USER %p %{sVv}
 ```
 
 Commit all related files:
