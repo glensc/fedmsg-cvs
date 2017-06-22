@@ -9,5 +9,9 @@ just live in your cwd/pwd.
 """
 
 config = {
+    # whether the consumer is enabled
     'cvs.consumer.enabled': True,
+
+    # allow 60 seconds to collect file commits for same commitid
+    'cvs.consumer.delay': 60,
 }
