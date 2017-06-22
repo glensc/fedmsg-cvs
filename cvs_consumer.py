@@ -72,6 +72,7 @@ class CVSConsumer(fedmsg.consumers.FedmsgConsumer):
                 del file['commitid']
                 commits[commitid]['files'].append(file)
 
+            commits[commitid]['commitid'] = commitid
             commits[commitid]['user'] = msg['msg']['user']
             commits[commitid]['message'] = msg['msg']['message']
             # which one to use, oldest? newest?
