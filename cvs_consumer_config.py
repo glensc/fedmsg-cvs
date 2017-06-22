@@ -13,7 +13,7 @@ config = {
     'cvs.consumer.enabled': True,
 
     # allow this amount of seconds to collect file commits for same commitid
-    'cvs.consumer.delay': 15,
+    'cvs.consumer.delay': 3.0,
 
     # URL to CVSWEB
     'cvs.cvsweb_url': 'https://cvs.example.net',
