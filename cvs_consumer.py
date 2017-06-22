@@ -19,6 +19,11 @@ class CVSConsumer(fedmsg.consumers.FedmsgConsumer):
 
         super(CVSConsumer, self).__init__(hub)
 
+        self.cvsweb_url = self.hub.config['cvs.cvsweb_url']
+        self.co_url = self.hub.config['cvs.co_url']
+        self.diff_url = self.hub.config['cvs.diff_url']
+        self.log_url = self.hub.config['cvs.log_url']
+
         # This is required.
         # It is the number of seconds that we should wait
         # until we ultimately act on a cvs-file commit messages.
@@ -66,10 +71,7 @@ class CVSConsumer(fedmsg.consumers.FedmsgConsumer):
                 }
 
             for file in msg['msg']['files']:
-                # prepend "module" to filename
-                file['filename'] = msg['msg']['module'] + '/' + file['filename']
-                # commitid not relevant
-                del file['commitid']
+                self.updateFile(file)
                 commits[commitid]['files'].append(file)
 
             commits[commitid]['commitid'] = commitid
@@ -80,3 +82,35 @@ class CVSConsumer(fedmsg.consumers.FedmsgConsumer):
 
         for commitid, commit in commits.items():
             fedmsg.publish(topic='commit', modname='cvs', active=True, name='relay_inbound', msg=commit)
+
+    def updateFile(self, file):
+        """
+        update `file` object: add urls, drop commitid
+        """
+        file['urls'] = self.buildUrlsMessage(file)
+        # commitid not relevant
+        del file['commitid']
+
+    def buildUrlsMessage(self, file):
+        urls = {}
+
+        if file['old_rev']:
+            urls['old_url'] = self.buildUrl(self.co_url, file, file['old_rev'])
+        if file['new_rev']:
+            urls['new_url'] = self.buildUrl(self.co_url, file, file['new_rev'])
+
+        if file['old_rev'] and file['new_rev']:
+            urls['diff_url'] = self.buildUrl(self.diff_url, file)
+        if file['new_rev']:
+            urls['log_url'] = self.buildUrl(self.log_url, file, file['new_rev'])
+
+        return urls
+
+    def buildUrl(self, url, file, rev = None):
+        params = {
+            'url': self.cvsweb_url,
+        }
+        params.update(file)
+        if rev:
+            params['rev'] = rev
+        return url % params

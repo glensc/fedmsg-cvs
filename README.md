@@ -1,29 +1,34 @@
 # FedMsg CVS Publisher
 
-## Installation
+This plugin creates FedMsg messages from CVS commits,
+It also includes FedMsg Consumer which emits FedMsg messages grouped by CVS
+commitid.
+
+Flow:
+- cvs hook emits `net.ed.prod.cvs.file-commit` messages
+- consumer gathers `net.ed.prod.cvs.file-commit` messages and emits
+  `net.ed.prod.cvs.commit` messages grouped by commit-id.
+
+## Hook Installation
 
 Ensure `fedmsg` package is installed to CVS server.
-
-Configure and add `CVSROOT/fedmsg-cvs-hook.conf`
-
-Add to `checkoutlist`
-```
-fedmsg-cvs-hook.conf
-```
 
 Add to `CVSROOT/loginfo`:
 
 ```
-ALL /usr/sbin/fedmsg-cvs-hook $CVSROOT/CVSROOT/fedmsg-cvs-hook.conf $USER %p %{sVv}
+ALL /usr/sbin/fedmsg-cvs-hook $USER %p %{sVv}
 ```
 
-Commit all related files:
-- `CVSROOT/fedmsg-cvs-hook.conf`
-- `CVSROOT/checkoutlist`
-- `CVSROOT/loginfo`
+## Consumer Installation
 
-## Flow
+```
+# Copy the cvs_consumer_config.py into ./fedmsg.d/ directory.
+# For production copy to /etc/fedmsg.d directory.
+cp cvs_consumer_config.py fedmsg.d
 
-- cvs hook emits `net.ed.prod.cvs.file-commit` messages
-- consumer gathers `net.ed.prod.cvs.file-commit` messages and emits
-  `net.ed.prod.cvs.commit` messages grouped by commit-id.
+# Setup your consumer by running
+python setup.py develop
+
+# Start the fedmsg-hub (which should pick up your consumer) with:
+fedmsg-hub
+```

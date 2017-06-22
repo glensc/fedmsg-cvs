@@ -5,7 +5,7 @@
 #
 # Setup:
 # Put to CVSROOT/loginfo:
-# ALL $CVSROOT/CVSROOT/fedmsg-cvs-hook /path/to/config.conf $USER %p %{sVv}
+# ALL $CVSROOT/CVSROOT/fedmsg-cvs-hook $USER %p %{sVv}
 
 import sys
 import re
@@ -16,10 +16,9 @@ import fedmsg
 
 class FedmsgCvsHook():
     def __init__(self, argv, stdin):
-        self.user, self.module = argv[2:4]
-        self.files = argv[4:]
+        self.user, self.module = argv[1:3]
+        self.files = argv[3:]
         self.commit_msg = self.get_commit_message(stdin)
-        self.config = self.parse_config(argv[1])
         self.commitid_pattern = re.compile('Commit Identifier:\s+(?P<commitid>\S+)')
 
     def buildMessage(self):
@@ -48,47 +47,22 @@ class FedmsgCvsHook():
         return commitids
 
     def buildFilesMessage(self):
-        c = self.config
-        defopts = { 'url': c['CVSWEB_URL'], 'module': self.module }
         files = []
         for filename, oldrev, newrev in self.grouped(self.files, 3):
             if filename in ['- New directory']:
                 continue
-            file = self.buildFileMessage(defopts, filename, oldrev, newrev)
+            file = self.buildFileMessage(self.module, filename, oldrev, newrev)
             files.append(file)
 
         return files
 
-    def buildFileMessage(self, defopts, filename, oldrev, newrev):
+    def buildFileMessage(self, module, filename, oldrev, newrev):
         file = {}
-        file['filename'] = filename
+        file['filename'] = os.path.join(module, filename)
         file['old_rev'] = oldrev if oldrev != 'NONE' else None
         file['new_rev'] = newrev if newrev != 'NONE' else None
         file['commitid'] = self.get_commit_id(filename)
-        file['urls'] = self.buildUrlsMessage(defopts, file)
         return file
-
-    def buildUrlsMessage(self, defopts, file):
-        opts = defopts.copy()
-        opts.update(file)
-        urls = {}
-
-        if opts['old_rev']:
-            urls['old_url'] = self.buildUrl('CO_URL', opts, opts['old_rev'])
-        if opts['new_rev']:
-            urls['new_url'] = self.buildUrl('CO_URL', opts, opts['new_rev'])
-
-        if opts['old_rev'] and opts['new_rev']:
-            urls['diff_url'] = self.buildUrl('DIFF_URL', opts)
-        if opts['new_rev']:
-            urls['log_url'] = self.buildUrl('LOG_URL', opts, opts['new_rev'])
-
-        return urls
-
-    def buildUrl(self, url, opts, rev = None):
-        if rev:
-            opts['rev'] = rev
-        return self.config[url] % opts
 
     def get_commit_id(self, filename):
         if not os.path.exists(filename):
@@ -125,21 +99,6 @@ class FedmsgCvsHook():
                 break
 
         return ''.join(lines[i + 1:]).strip()
-
-    def parse_config(self, filename):
-        """Parse configuration file.
-
-        Args:
-          filename: Path to the configuration file to parse.
-        Returns:
-          Dictionary of values defined in the file.
-        """
-        with open(filename) as f:
-            data = f.read()
-            compiled = compile(data, filename, "exec")
-            result = { 'main': sys.modules[__name__] }
-            eval(compiled, result)
-            return result
 
     # http://stackoverflow.com/a/5389547
     def grouped(self, iterable, n):
