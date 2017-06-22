@@ -2,7 +2,7 @@ Summary:	FedMsg CVS Publisher
 Name:		fedmsg-cvs
 Version:	%{version}
 Release:	%{release}
-License:	GPL v2
+License:	BSD
 Group:		Libraries/Python
 BuildRequires:	rpm-pythonprov
 BuildRequires:	rpmbuild(macros) >= 1.714
