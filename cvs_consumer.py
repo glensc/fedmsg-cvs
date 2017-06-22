@@ -23,15 +23,15 @@ class CVSConsumer(fedmsg.consumers.FedmsgConsumer):
 
         super(CVSConsumer, self).__init__(hub)
 
-        self.cvsweb_url = self.hub.config['cvs.cvsweb_url']
-        self.co_url = self.hub.config['cvs.co_url']
-        self.diff_url = self.hub.config['cvs.diff_url']
-        self.log_url = self.hub.config['cvs.log_url']
+        self.cvsweb_url = hub.config['cvs.cvsweb_url']
+        self.co_url = hub.config['cvs.co_url']
+        self.diff_url = hub.config['cvs.diff_url']
+        self.log_url = hub.config['cvs.log_url']
 
         # This is required.
         # It is the number of seconds that we should wait
         # until we ultimately act on a cvs file commit messages.
-        self.delay = self.hub.config['cvs.consumer.delay']
+        self.delay = hub.config['cvs.consumer.delay']
 
         self.log.info("CVS: delay %ds" % self.delay)
 
