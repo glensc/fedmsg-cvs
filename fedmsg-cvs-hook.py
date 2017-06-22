@@ -65,7 +65,8 @@ class FedmsgCvsHook():
         return file
 
     def get_commit_id(self, filename):
-        if not os.path.exists(filename):
+        # skip when mocking
+        if not os.path.exists('CVS/Entries'):
             return None
 
         command = 'cvs -Qn status '.split()
