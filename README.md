@@ -21,3 +21,9 @@ Commit all related files:
 - `CVSROOT/fedmsg-cvs-hook.conf`
 - `CVSROOT/checkoutlist`
 - `CVSROOT/loginfo`
+
+## Flow
+
+- cvs hook emits `net.ed.prod.cvs.file-commit` messages
+- consumer gathers `net.ed.prod.cvs.file-commit` messages and emits
+  `net.ed.prod.cvs.commit` messages grouped by commit-id.

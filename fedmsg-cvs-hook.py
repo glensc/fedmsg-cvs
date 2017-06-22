@@ -152,4 +152,4 @@ if len(sys.argv) > 3:
 
     # until this is in place, add name="relay_inbound": http://paste.fedoraproject.org/155599/74653371/
     # https://github.com/fedora-infra/fedmsg/issues/426
-    fedmsg.publish(topic='commit', modname='cvs', active=True, name='relay_inbound', msg=msg)
+    fedmsg.publish(topic='file-commit', modname='cvs', active=True, name='relay_inbound', msg=msg)
