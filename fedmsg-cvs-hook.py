@@ -38,13 +38,16 @@ class FedmsgCvsHook():
         # make unique
         commitids = list(set(commitids))
 
-        # return as string with single item
-        if len(commitids) == 1:
+        if not commitids:
+            # return None if empty list
+            # for example mkdir has no commitid information
+            return None
+        elif len(commitids) == 1:
+            # return as string with single item
             return commitids[0]
-
-        # this should not happen!
-        # but either way, return None or list
-        return commitids
+        else:
+            # this should not happen, return the list
+            return commitids
 
     def buildFilesMessage(self):
         files = []
