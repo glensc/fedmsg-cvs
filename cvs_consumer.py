@@ -86,7 +86,8 @@ class CVSConsumer(fedmsg.consumers.FedmsgConsumer):
 
         self.queued_messages.append(msg)
 
-        self.callId = reactor.callLater(self.delay, delayed_consume)
+        self.callId = reactor.callFromThread(reactor.callLater, self.delay, delayed_consume)
+
         self.log.debug("CVS: created call: %r" % self.callId)
 
     def action(self, messages):
