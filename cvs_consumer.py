@@ -108,6 +108,7 @@ class CVSConsumer(fedmsg.consumers.FedmsgConsumer):
             commits[commitid]['commitid'] = commitid
             commits[commitid]['user'] = msg['msg']['user']
             commits[commitid]['message'] = msg['msg']['message']
+            commits[commitid]['remote_addr'] = msg['msg']['remote_addr']
             # which one to use, oldest? newest?
             commits[commitid]['timestamp'] = msg['timestamp']
 

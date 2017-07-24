@@ -15,9 +15,10 @@ from itertools import izip
 import fedmsg
 
 class FedmsgCvsHook():
-    def __init__(self, argv, stdin):
+    def __init__(self, argv, stdin, env=[]):
         self.user, self.module = argv[1:3]
         self.files = argv[3:]
+        self.env = env
         self.commit_msg = self.get_commit_message(stdin)
         self.commitid_pattern = re.compile('Commit Identifier:\s+(?P<commitid>\S+)')
 
@@ -27,6 +28,7 @@ class FedmsgCvsHook():
             'module': self.module,
             'message' : self.commit_msg,
             'files': self.buildFilesMessage(),
+            'remote_addr' : self.getRemoteAddress(),
         }
         # grab commit id from all files
         msg['commitid'] = self.getCommitId(msg['files'])
@@ -48,6 +50,13 @@ class FedmsgCvsHook():
         else:
             # this should not happen, return the list
             return commitids
+
+    def getRemoteAddress(self):
+        if not self.env.has_key('SSH_CONNECTION'):
+            return None
+
+        s = self.env['SSH_CONNECTION']
+        return s.split(' ')[0]
 
     def buildFilesMessage(self):
         files = []
@@ -110,7 +119,7 @@ class FedmsgCvsHook():
         return izip(*[iter(iterable)]*n)
 
 if len(sys.argv) > 3:
-    hook = FedmsgCvsHook(sys.argv, sys.stdin)
+    hook = FedmsgCvsHook(sys.argv, sys.stdin, env=os.environ)
     msg = hook.buildMessage()
 
     # until this is in place, add name="relay_inbound": http://paste.fedoraproject.org/155599/74653371/
